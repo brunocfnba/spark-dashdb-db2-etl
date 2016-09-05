@@ -38,7 +38,7 @@ To write the data the default dataframewriter class is used.
 
 ##Run the job
 To run the job, the spark-submit is used. It's required to specify the driver path in the command call, otherwise Spark is not able to find it and can't share the driver among the executors.
-I have added the DB2/DashDB driver to the repo. Assuming you are runnning all form the same folder this is the most basic way to run your spark job:
+I have added the DB2/DashDB driver to the repo. Assuming you are runnning all from the same folder this is the most basic way to run your spark job:
 ```
 spark-submit --master spark://bldbz172235:7077  --jars db2jcc4.jar --conf spark.executor.extraClassPath=db2jcc4.jar --driver-class-path db2jcc4.jar spark_sr.py
 ```
