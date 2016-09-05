@@ -1,12 +1,23 @@
 from pyspark import SparkContext, SparkConf, SQLContext
 from pyspark.sql.functions import *
 
-conf = SparkConf().setAppName("spark_change_dash")
+conf = SparkConf().setAppName("spark_db2_dash")
 sc = SparkContext(conf=conf)
 sqlContext = SQLContext(sc)
 
-#read data from dashDB
-propertiesDBMaximo = {"user":"r",
-                      "password": ""}
+#Query to run against DB2
+sql1 = "(SELECT CLICODE, NAME, BIRTHDAY, DESCRIPTION from CLIENT_TABLE) as tableClient"
 
-sql1 = "(SELECT w.WORKORDERID, w.WONUM, w.STATUS, w.WORKTYPE, w.DESCRIPTION, w.REPORTDATE, w.SCHEDSTART, w.SCHEDFINISH, w.OWNER, w.OWNERGROUP, TRIM(w.PLUSPCUSTOMER) AS PLUSPCUSTOMER, w.PMCHGTYPE, w.WOCLASS, w.ACTSTART, w.ACTFINISH, w.ITDCLOSURECODE, w.FAILURECODE, w.BACKOUTPLAN,w.COMMODITY, w.CINUM, w.PMCHGAPPROVALSTATE, w.ITDCHGPRETSTDTL, cd.LDTEXT AS CHANGE_DESCRIPTION, ca.LDTEXT AS CAUSE, pdd.LDTEXT AS PRETEST_DETAIL_DESCRIPTION,fr.DESCRIPTION AS FAILURE_DESCRIPTION, bp.LDTEXT AS BACK_OUT_PLAN_DESCRIPTION,w.ITDCHCREATEDBY AS CREATED_BY FROM MAXIMO.WORKORDER w left outer join (select LDKEY, LDTEXT from maximo
+#Client dataframe creation from DB2 data using 300 partitions on CLICODE column
+dfClient = sqlContext.read.format("jdbc").options(url="jdbc:db2://123.13.321.31:50000/DBNAME", user="dbuser", password="dbpassword",partitionColumn="CLICODE", lowerBound=0L, upperBound=100000L, dbtable=sql1, numPartitions=300L, driver="com.ibm.db2.jcc.DB2Driver").load()
+
+#Replacing client dataframe schema names with the ones in the target table
+finalDF = dfClient.select(dfClient.CLICODE.alias("CLIENT_CODE"),dfCLient.NAME,dfClient.BIRTHDAY.alias("DATE_OF_BIRTH"),dfCLient.DESCRIPTION.alias("GENERAL_INFO"))
+
+#DashDB access information
+propertiesDBDash = {
+                    "user":"dashUser",
+                    "password":"dashPassword"}
+
+#Writing data into target DashDB database
+joinedFinal.write.mode("append").jdbc("jdbc:db2://youraddress.com:50000/DBNAME", "CLIENT_TABLE_TARGET",properties=propertiesDBDash)
