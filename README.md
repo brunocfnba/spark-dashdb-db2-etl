@@ -28,15 +28,15 @@ numPartitions is where you define how many partitions should be created (how man
 
 Provide the DB2 driver in the driver attribute.
 
-##Adjusting column names
+## Adjusting column names
 To use the native jdbc connector, you need to ensure the schema has the same column names as the target table. For this the spark dataframe alias can be used.
-````
+```
 finalDF = dfClient.select(dfClient.CLICODE.alias("CLIENT_CODE"),dfCLient.NAME,dfClient.BIRTHDAY.alias("DATE_OF_BIRTH"),dfCLient.DESCRIPTION.alias("GENERAL_INFO"))
 ```
 
 To write the data the default dataframewriter class is used.
 
-##Run the job
+## Run the job
 To run the job, the spark-submit is used. It's required to specify the driver path in the command call, otherwise Spark is not able to find it and can't share the driver among the executors.
 I have added the DB2/DashDB driver to the repo. Assuming you are runnning all from the same folder this is the most basic way to run your spark job:
 ```
